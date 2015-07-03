@@ -3,7 +3,7 @@ package DBIx::Class::Objects::Base;
 use Moose;
 use DBIx::Class::Objects::Util 'class_name_to_private_accessor';
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 sub BUILD {
     my $self = shift;
@@ -34,6 +34,11 @@ sub update {
     }
 }
 
+sub delete {
+    my $self = shift;
+    $self->result_source->delete;
+}
+
 1;
 
 __END__
@@ -48,6 +53,8 @@ inherited objects.
 =head1 AUTHOR
 
 Curtis "Ovid" Poe, C<< <ovid at cpan.org> >>
+
+Dan Burke C<< dburke at addictmud.org >>
 
 =head1 BUGS
 

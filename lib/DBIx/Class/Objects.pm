@@ -2,6 +2,7 @@ package DBIx::Class::Objects;
 
 use Moose;
 use Carp;
+use Moose::Util qw( apply_all_roles );
 
 # using this because it will be applied to result classes, not because we want
 # to import this behavior
@@ -10,7 +11,7 @@ use DBIx::Class::Objects::Role::Result ();
 use Class::Load 'try_load_class';
 use namespace::autoclean;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 has 'schema' => (
     is       => 'ro',
@@ -36,6 +37,13 @@ has 'result_role' => (
     isa      => 'Str',
     required => 1,
     default  => 'DBIx::Class::Objects::Role::Result',
+);
+
+has roles => (
+    is => 'ro',
+    isa => 'ArrayRef[Str]',
+    required => 0,
+    default => sub { [] },
 );
 
 has 'object_base' => (
@@ -72,7 +80,7 @@ sub _create_object_set {
     my ( $self, $resultset ) = @_;
 
     my %methods;
-    foreach my $method (qw/find next/) {
+    foreach my $method (qw/next create single/) {
 
         # Haven't debugged this, but simply declaring a single subroutine and
         # assigning it to the keys doesn't work. You get errors like this:
@@ -94,7 +102,7 @@ sub _create_object_set {
             my $object_class = $self->_get_object_class_name($source_name)
               or croak(
                 "Panic: Couldn't determine object class in '$method' for '$source_name'");
-            return $object_class->new( { result_source => $result } );
+            return $object_class->new( { result_source => $result, object_source => $self, } );
         };
     }
 
@@ -113,7 +121,7 @@ sub _create_object_set {
                 my $object_class = $self->_get_object_class_name(
                     $all[0]->result_source->source_name );
                 return
-                  map { $object_class->new( { result_source => $_ } ) } @all;
+                  map { $object_class->new( { result_source => $_, object_source => $self, } ) } @all;
             },
         },
     );
@@ -124,6 +132,8 @@ sub _create_object_set {
 sub load_objects {
     my $self   = shift;
     my $schema = $self->schema;
+
+    apply_all_roles( $self->base_class, @{ $self->roles } ) if scalar(@{ $self->roles });
 
     foreach my $source_name ($schema->sources) {
         my $object_class = $self->_get_object_class_name($source_name);
@@ -155,6 +165,7 @@ sub load_objects {
             $meta->superclasses( $meta->superclasses, $self->base_class );
         }
         $self->_add_methods( $object_class, $source_name );
+
         $meta->make_immutable if $was_immutable;
     }
 }
@@ -207,7 +218,7 @@ sub _add_methods {
                     my $response = $this->result_source->$relationship
                       or return;
                     return $other_class->new(
-                        { result_source => $response } );
+                        { result_source => $response, object_source => $self, } );
                 }
             );
         }
@@ -232,7 +243,7 @@ DBIx::Class::Objects - Rewrite your DBIC objects via inheritance
 
 =head1 VERSION
 
-0.02
+0.03
 
 =head1 SYNOPSIS
 
@@ -241,6 +252,7 @@ DBIx::Class::Objects - Rewrite your DBIC objects via inheritance
     my $objects = DBIx::Class::Objects->new({
         schema      => $schema,
         object_base => 'My::Object',
+        roles       => [qw( My::Role::Thing )],
     });
     $objects->load_objects;
 
@@ -350,6 +362,12 @@ built on the fly.
     Trying to load My::Object::OrderItem
         My::Object::OrderItem not found. Building.
 
+=item * C<roles> (optional)
+
+This will apply the optional Moose role(s) to your My::Object classes.  Useful
+for if you have some utility functions you would like applied to each table
+without having to create files for every table.
+
 =back
 
 =head2 C<load_objects>
@@ -414,6 +432,7 @@ methods (according to the debugger):
     email
     meta
     name
+    object_source
     person_id
     result_source
     update
@@ -438,6 +457,7 @@ C<UNIVERSAL> methods and methods in ALL CAPS, you get this:
     email
     meta
     name
+    object_source
     person_id
     result_source
     update
@@ -503,14 +523,19 @@ You've now inherited the delegated methods from C<My::Object::Person>.
     }
 
 For every object, calling C<result_source> gets you the original
-C<DBIx::Class::Result>.
+C<DBIx::Class::Result>,
 
     say $customer->result_source; # Sample::Schema::Result::Customer
     say $customer->person->result_source; # Sample::Schema::Result::Person
 
+and calling C<object_source> gets you the encapsulating C<DBIx::Class::Objects>
+object.
+
 =head1 AUTHOR
 
 Curtis "Ovid" Poe, C<< <ovid at cpan.org> >>
+
+Dan Burke C<< dburke at addictmud.org >>
 
 =head1 BUGS
 
