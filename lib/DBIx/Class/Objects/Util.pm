@@ -1,9 +1,8 @@
 package DBIx::Class::Objects::Util;
-
+$DBIx::Class::Objects::Util::VERSION = '0.05';
 use strict;
 use warnings;
 
-our $VERSION = '0.04';
 
 use base 'Exporter';
 our @EXPORT_OK = qw(
@@ -24,6 +23,10 @@ __END__
 =head1 NAME
 
 DBIx::Class::Objects::Util - Internal utilities for DBIx::Class::Objects
+
+=head1 VERSION
+
+version 0.05
 
 =head1 DESCRIPTION
 
@@ -114,4 +117,3 @@ YOUR LOCAL LAW. UNLESS REQUIRED BY LAW, NO COPYRIGHT HOLDER OR
 CONTRIBUTOR WILL BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR
 CONSEQUENTIAL DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THE PACKAGE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-

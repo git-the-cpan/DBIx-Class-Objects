@@ -1,10 +1,10 @@
 package DBIx::Class::Objects::Attribute::Trait::DBIC;
-
+$DBIx::Class::Objects::Attribute::Trait::DBIC::VERSION = '0.05';
 use Moose::Role;
 
-our $VERSION = '0.04';
 
-#package Moose::Meta::Attribute::Custom::Trait::DBIC;
+package Moose::Meta::Attribute::Custom::Trait::DBIC;
+$Moose::Meta::Attribute::Custom::Trait::DBIC::VERSION = '0.05';
 sub register_implementation { 'DBIx::Class::Objects::Attribute::Trait::DBIC' }
 
 1;
@@ -12,6 +12,10 @@ sub register_implementation { 'DBIx::Class::Objects::Attribute::Trait::DBIC' }
 =head1 NAME
 
 DBIx::Class::Objects::Attribute::Trait::DBIC
+
+=head1 VERSION
+
+version 0.05
 
 =head1 DESCRIPTION
 

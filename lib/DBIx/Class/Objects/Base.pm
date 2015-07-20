@@ -1,9 +1,8 @@
 package DBIx::Class::Objects::Base;
-
+$DBIx::Class::Objects::Base::VERSION = '0.05';
 use Moose;
 use DBIx::Class::Objects::Util 'class_name_to_private_accessor';
 
-our $VERSION = '0.04';
 
 sub BUILD {
     my $self = shift;
@@ -46,6 +45,10 @@ __END__
 =head1 NAME
 
 DBIx::Class::Objects::Base - Base class for DBIx::Class::Objects objects
+
+=head1 VERSION
+
+version 0.05
 
 Adds an C<update> method to the objects to allow them to also update any
 inherited objects.

@@ -1,9 +1,9 @@
 package DBIx::Class::Objects::Role::Result;
+$DBIx::Class::Objects::Role::Result::VERSION = '0.05';
 use MooseX::Role::Parameterized;
 use DBIx::Class::Objects::Attribute::Trait::DBIC;
 use DBIx::Class::Objects::Util 'class_name_to_private_accessor';
 
-our $VERSION = '0.04';
 
 parameter 'handles' => (
     isa      => 'ArrayRef[Str]',
@@ -26,7 +26,7 @@ role {
     my $source = class_name_to_private_accessor( $param->source );
 
     has $source => (
-        traits  => ['DBIx::Class::Objects::Attribute::Trait::DBIC'],
+        traits  => ['DBIC'],
         is      => 'rw',
         isa     => $param->result_source_class,
         handles => $param->handles,
@@ -58,6 +58,10 @@ __END__
 =head1 NAME
 
 DBIx::Class::Objects::Role::Result
+
+=head1 VERSION
+
+version 0.05
 
 =head1 DESCRIPTION
 

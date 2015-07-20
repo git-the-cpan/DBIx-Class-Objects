@@ -1,5 +1,5 @@
 package DBIx::Class::Objects;
-
+$DBIx::Class::Objects::VERSION = '0.05';
 use Moose;
 use Carp;
 use Moose::Util qw( apply_all_roles );
@@ -11,7 +11,6 @@ use DBIx::Class::Objects::Role::Result ();
 use Class::Load 'try_load_class';
 use namespace::autoclean;
 
-our $VERSION = '0.04';
 
 has 'schema' => (
     is       => 'ro',
@@ -140,10 +139,17 @@ sub load_objects {
 
         $self->_debug("Trying to load $object_class");
 
-        if ( try_load_class($object_class) ) {
+        my ($result, $error) = try_load_class( $object_class );
+
+        if ( $result ) {
             $self->_debug("\t$object_class found.");
         }
         else {
+
+            if ( $error =~ /Compilation failed in require/ ) {
+                die $error;
+            }
+
             $self->_debug("\t$object_class not found. Building.");
             Moose::Meta::Class->create(
                 $object_class,
@@ -228,7 +234,7 @@ sub _add_methods {
 sub _debug {
     my ( $self, $message ) = @_;
     return unless $self->debug;
-    warn "$message\n";
+    warn sprintf("%s :: %s\n", scalar localtime, $message);
 }
 
 __PACKAGE__->meta->make_immutable;
@@ -243,7 +249,7 @@ DBIx::Class::Objects - Rewrite your DBIC objects via inheritance
 
 =head1 VERSION
 
-0.04
+version 0.05
 
 =head1 SYNOPSIS
 
